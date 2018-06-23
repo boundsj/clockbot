@@ -6,9 +6,9 @@ import PackageDescription
 let package = Package(
     name: "clockbot",
     dependencies: [
-        .package(url: "https://github.com/boundsj/websocket.git", .revision("834511bcb0f39b571918853e05b77587c93a2c0c"))
+        .package(url: "https://github.com/boundsj/ArgyleKit.git", .revision("4f0a57d016627d9446f58025fac43b9a4b2cae7a"))
     ],
     targets: [
-        .target(name: "clockbot", dependencies: ["WebSocket"]),
+        .target(name: "clockbot", dependencies: ["ArgyleKit"]),
     ]
 )

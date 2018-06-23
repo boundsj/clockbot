@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "ArgyleKit",
+        "repositoryURL": "https://github.com/boundsj/ArgyleKit.git",
+        "state": {
+          "branch": null,
+          "revision": "4f0a57d016627d9446f58025fac43b9a4b2cae7a",
+          "version": null
+        }
+      },
+      {
         "package": "Core",
         "repositoryURL": "https://github.com/vapor/core.git",
         "state": {
