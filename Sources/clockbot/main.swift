@@ -3,10 +3,11 @@ import WebSocket
 
 // Bot library
 
-public typealias eventHandler = (String) -> Void
+public typealias eventHandler = (SlackRTMClient, String) -> Void
 
 public enum EventType: String {
     case connect = "hello"
+    case message = "message"
     case unknown
 }
 
@@ -54,6 +55,8 @@ struct RTMResponse: Decodable {
         switch type {
         case "hello":
             return .connect
+        case "message":
+            return .message
         default:
             return .unknown
         }
@@ -104,14 +107,12 @@ public class SlackRTMClient {
                     let data = text.data(using: String.Encoding.utf8, allowLossyConversion: false)!
                     let rtmResponse = try JSONDecoder().decode(RTMResponse.self, from: data)
                     if let handler = self.eventHandlers[rtmResponse.eventType] {
-                        handler(text)
+                        handler(self, text)
                     }
                 } catch {
                     print("Could not parse json from RTM")
                     return
                 }
-
-                if text == "{\"type\": \"hello\"}" { return }
             }
 
             websocket.onCloseCode { code in
@@ -126,6 +127,23 @@ public class SlackRTMClient {
 
     func on(event: EventType, handler: @escaping eventHandler) {
         eventHandlers[event] = handler
+    }
+
+    func sendMessage(channel: String, text: String) {
+        guard let websocket = websocket else {
+            fatalError("No websocket available!")
+        }
+        
+        var response: Dictionary = [String: Any]()
+        response["type"] = "message"
+        response["channel"] = channel
+        response["text"] = text
+        response["id"] = self.messageId
+        self.messageId += 1
+
+        let responseJSON = try! JSONSerialization.data(withJSONObject: response)
+        let string = String(data: responseJSON, encoding: String.Encoding.utf8)!
+        websocket.send(text: string)
     }
 }
 
@@ -147,8 +165,10 @@ guard let token = ProcessInfo.processInfo.environment["token"] else {
 
 let rtm = SlackRTMClient(token: token)
 rtm.start()
-rtm.on(event: .connect) { (text) in
-    print("=====> We've got \(text)")
+rtm.on(event: .message) { (rtm, text) in
+    if text.contains("time") {
+        rtm.sendMessage(channel: "C03BMRQLA", text: "Hello, it is \(Date().description)")
+    }
 }
 
 dispatchMain()
