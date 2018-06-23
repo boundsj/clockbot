@@ -164,7 +164,7 @@ extension String {
 
 }
 
-/// Bot
+/// Bot app
 
 guard let token = ProcessInfo.processInfo.environment["token"] else {
     fatalError("Could not find a token!")
