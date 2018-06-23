@@ -3,7 +3,7 @@ import WebSocket
 
 // Bot library
 
-public typealias eventHandler = (SlackRTMClient, String) -> Void
+public typealias eventHandler = (SlackRTMClient, Response) -> Void
 
 public enum EventType: String {
     case connect = "hello"
@@ -45,6 +45,7 @@ class HTTPService {
 
 struct RTMResponse: Decodable {
     var type: String
+    var channel: String?
     var eventType: EventType {
         get {
             return eventTypeFromType()
@@ -63,6 +64,11 @@ struct RTMResponse: Decodable {
     }
 }
 
+public struct Response {
+    var eventType: EventType
+    var json: String
+    var channel: String?
+}
 
 public class SlackRTMClient {
 
@@ -106,8 +112,9 @@ public class SlackRTMClient {
                 do {
                     let data = text.data(using: String.Encoding.utf8, allowLossyConversion: false)!
                     let rtmResponse = try JSONDecoder().decode(RTMResponse.self, from: data)
+                    let response = Response(eventType: rtmResponse.eventType, json: text, channel: rtmResponse.channel)
                     if let handler = self.eventHandlers[rtmResponse.eventType] {
-                        handler(self, text)
+                        handler(self, response)
                     }
                 } catch {
                     print("Could not parse json from RTM")
@@ -133,7 +140,7 @@ public class SlackRTMClient {
         guard let websocket = websocket else {
             fatalError("No websocket available!")
         }
-        
+
         var response: Dictionary = [String: Any]()
         response["type"] = "message"
         response["channel"] = channel
@@ -165,10 +172,11 @@ guard let token = ProcessInfo.processInfo.environment["token"] else {
 
 let rtm = SlackRTMClient(token: token)
 rtm.start()
-rtm.on(event: .message) { (rtm, text) in
-    if text.contains("time") {
-        rtm.sendMessage(channel: "C03BMRQLA", text: "Hello, it is \(Date().description)")
+rtm.on(event: .message) { (rtm, response) in
+    guard response.json.contains("time"), let channel = response.channel else {
+        return
     }
+    rtm.sendMessage(channel: channel, text: "Hello, it is \(Date().description)")
 }
 
 dispatchMain()
