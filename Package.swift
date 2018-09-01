@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "clockbot",
     dependencies: [
-        .package(url: "https://github.com/boundsj/ArgyleKit.git", .revision("4f0a57d016627d9446f58025fac43b9a4b2cae7a"))
+        .package(url: "https://github.com/boundsj/ArgyleKit.git", .revision("12efc6d585a63970a8d76f71fee9190593c55065"))
     ],
     targets: [
         .target(name: "clockbot", dependencies: ["ArgyleKit"]),

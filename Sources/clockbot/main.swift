@@ -6,12 +6,14 @@ guard let token = ProcessInfo.processInfo.environment["token"] else {
 }
 
 let rtm = SlackRTMClient(token: token)
-rtm.start()
+
 rtm.on(event: .message) { (rtm, response) in
     guard response.json.contains("time"), let channel = response.channel else {
         return
     }
     rtm.sendMessage(channel: channel, text: "Hello, it is \(Date().description)")
 }
+
+rtm.start()
 
 dispatchMain()
